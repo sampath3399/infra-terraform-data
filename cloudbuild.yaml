@@ -14,6 +14,4 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY  # Use Cloud Logging for build logs
-  logging_bucket: "gs://migrationproject62718-build-logs"  # Specify your GCS bucket for logs
-
 timeout: 1200s
