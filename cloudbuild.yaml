@@ -1,22 +1,37 @@
 steps:
-  # Step 1: Set up Terraform backend (GCS) and initialize
-  - name: 'hashicorp/terraform:1.5.7'  # ✅ Official HashiCorp image
-    entrypoint: 'sh'
-    args:
-      - '-c'
-      - |
-        terraform init \
-          -backend-config="bucket=migrationproject62718-terraform-state" \
-          -backend-config="prefix=terraform/state"
-
-  # Step 2: Apply Terraform configuration with auto-approve
+  # Step 1: Initialize Terraform and configure backend with temporary GCS bucket
   - name: 'hashicorp/terraform:1.5.7'
-    entrypoint: 'sh'
+    id: 'terraform-init'
     args:
-      - '-c'
-      - |
-        terraform apply -auto-approve
+      - 'init'
+      - '-backend-config=bucket=gcs-bigquery-batch-data-bucket'  # Using the temp bucket for now
+      - '-backend-config=prefix=terraform/state'
+    env:
+      - 'GOOGLE_APPLICATION_CREDENTIALS=/workspace/gcp-key.json'  # If you need service account keys
+  
+  # Step 2: Apply Terraform plan to create resources
+  - name: 'hashicorp/terraform:1.5.7'
+    id: 'terraform-apply'
+    args:
+      - 'apply'
+      - '-auto-approve'
 
+  # Step 3: Create the final GCS bucket (optional, if needed after applying)
+  - name: 'hashicorp/terraform:1.5.7'
+    id: 'create-final-bucket'
+    args:
+      - 'apply'
+      - '-target=google_storage_bucket.final_bucket_name'  # Apply specific target to create your final bucket
+      - '-auto-approve'
+
+  # Step 4: Reinitialize Terraform with the final GCS bucket for state storage
+  - name: 'hashicorp/terraform:1.5.7'
+    id: 'terraform-reinit'
+    args:
+      - 'init'
+      - '-backend-config=bucket=final-bucket-for-state'  # Replace with the final bucket name once created
+      - '-backend-config=prefix=terraform/state'
+  
 options:
-  logging: CLOUD_LOGGING_ONLY   # ✅ Push logs to Cloud Logging (for observability)
+  logging: CLOUD_LOGGING_ONLY  # Use Cloud Logging for build logs
 timeout: 9200s
