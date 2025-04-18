@@ -1,0 +1,15 @@
+steps:
+  # Step 1: Initialize Terraform and configure backend (GCS)
+  - name: 'gcr.io/cloud-builders/terraform'
+    args:
+      - 'init'
+      - '-backend-config=bucket=migrationproject62718-terraform-state'
+      - '-backend-config=prefix=terraform/state'
+
+  # Step 2: Apply Terraform plan to create resources
+  - name: 'gcr.io/cloud-builders/terraform'
+    args:
+      - 'apply'
+      - '-auto-approve'
+
+timeout: 1200s
