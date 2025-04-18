@@ -1,17 +1,22 @@
 steps:
-  # Step 1: Initialize Terraform and configure backend (GCS)
-  - name: 'gcr.io/cloud-builders/terraform'
+  # Step 1: Set up Terraform backend (GCS) and initialize
+  - name: 'hashicorp/terraform:1.5.7'  # ✅ Official HashiCorp image
+    entrypoint: 'sh'
     args:
-      - 'init'
-      - '-backend-config=bucket=migrationproject62718-terraform-state'
-      - '-backend-config=prefix=terraform/state'
+      - '-c'
+      - |
+        terraform init \
+          -backend-config="bucket=migrationproject62718-terraform-state" \
+          -backend-config="prefix=terraform/state"
 
-  # Step 2: Apply Terraform plan to create resources
-  - name: 'gcr.io/cloud-builders/terraform'
+  # Step 2: Apply Terraform configuration with auto-approve
+  - name: 'hashicorp/terraform:1.5.7'
+    entrypoint: 'sh'
     args:
-      - 'apply'
-      - '-auto-approve'
+      - '-c'
+      - |
+        terraform apply -auto-approve
 
 options:
-  logging: CLOUD_LOGGING_ONLY  # Use Cloud Logging for build logs
+  logging: CLOUD_LOGGING_ONLY   # ✅ Push logs to Cloud Logging (for observability)
 timeout: 9200s
