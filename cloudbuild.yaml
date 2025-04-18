@@ -31,3 +31,4 @@ timeout: '1200s'  # 20 minutes
 # Logging options
 options:
   logging: CLOUD_LOGGING_ONLY  # Use Cloud Logging for build logs
+
