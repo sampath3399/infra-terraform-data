@@ -14,4 +14,4 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY  # Use Cloud Logging for build logs
-timeout: 1200s
+timeout: 9200s
